@@ -10,7 +10,7 @@ int estado = 0  ;
 
 void setup()
 {
-  Serial.begin(9600);
+  //Serial.begin(9600);
   esp8266.begin(19200); // your esp's baud rate might be different
 
   sendData("AT+RST\r\n", 2000, DEBUG); // reset module
