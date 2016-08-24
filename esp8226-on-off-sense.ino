@@ -7,6 +7,9 @@ SoftwareSerial esp8266(3, 2); // make RX Arduino line is pin 2, make TX Arduino 
 // and the RX line from the esp to the Arduino's pin 3
 
 int estado = 0  ;
+int outputpin = 0;
+int inputpin =  7;
+
 
 void setup()
 {
@@ -22,6 +25,8 @@ void setup()
 
   //LEDS
   pinMode(13, OUTPUT);
+  pinMode(outputpin, OUTPUT);
+  pinMode(inputpin, INPUT);
 
 }
 
@@ -38,27 +43,28 @@ void loop()
 
       String webpage;
       String parametro = readData(500, DEBUG);
-      
+      int button = digitalRead(inputpin);
+
       if (parametro.indexOf("apagar") > 0) {
-        estado = 0;  
+        estado = 0;
       }
 
       if (parametro.indexOf("prender") > 0) {
         estado = 1;
       }
-      
+
       if (estado == 1)
       {
-        webpage = "<h1><a href='./apagar'>Apagar</a></h1>";
+        webpage = "<h1><a href='./apagar'>Apagar</a> boton: " + String(button) + "</h1>";
         digitalWrite(13, HIGH);
-      }  
+      }
       if (estado == 0)
       {
         digitalWrite(13, LOW);
-        webpage = "<h1><a href='./prender'>Encender</a></h1>";
+        webpage = "<h1><a href='./prender'>Encender</a> boton: " + String(button) + "</h1>";
       }
 
-      
+
       String cipSend = "AT+CIPSEND=";
       cipSend += connectionId;
       cipSend += ",";
