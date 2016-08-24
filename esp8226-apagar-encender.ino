@@ -13,14 +13,12 @@ void setup()
   Serial.begin(9600);
   esp8266.begin(19200); // your esp's baud rate might be different
 
-
-
   sendData("AT+RST\r\n", 2000, DEBUG); // reset module
   sendData("AT+CWMODE=3\r\n", 1000, DEBUG); // configure as access point
   sendData("AT+CIFSR\r\n", 1000, DEBUG); // get ip address
   sendData("AT+CIPMUX=1\r\n", 1000, DEBUG); // configure for multiple connections
   sendData("AT+CIPSERVER=1,80\r\n", 1000, DEBUG); // turn on server on port 80
-  sendData("AT+CWJAP=\"FBI\",\"teoputo021188\"\r\n", 3000, DEBUG); // turn on server on port 80
+  sendData("AT+CWJAP=\"devs\",\"@deVP2016!\"\r\n", 3000, DEBUG); // turn on server on port 80
 
   //LEDS
   pinMode(13, OUTPUT);
@@ -32,44 +30,23 @@ void loop()
   char c;
   if (esp8266.available()) // check if the esp is sending a message
   {
-    String mensaje = "";
-    while (esp8266.available())
-    {
-      // The esp has data so display its output to the serial window
-      c = esp8266.read(); // read the next character.
-      Serial.write(c);
-      mensaje += c;
-    }
-    //Serial.print("G:" + mensaje + ":G");
-    if (esp8266.find("+IPD,"))
-    {
+
       delay(1000);
 
       int connectionId = esp8266.read() - 48; // subtract 48 because the read() function returns
       // the ASCII decimal value and 0 (the first decimal number) starts at 48
 
-      Serial.print("ConectionID: " + connectionId);
-      Serial.print("*");
-
-
-      String parametro = readData(1000, DEBUG);
+      String webpage;
+      String parametro = readData(500, DEBUG);
       
       if (parametro.indexOf("apagar") > 0) {
-        //Serial.print("PUSO APAGAAAARRR Y ENTRO AL IF!!!");
-        //Serial.print("ESTADO " + String(parametro.indexOf("apagar") > 0));
         estado = 0;  
       }
 
       if (parametro.indexOf("prender") > 0) {
         estado = 1;
-        //Serial.print("PUSO APAGAAAARRR Y ENTRO AL IF DE PRENDER!!!");
-        //Serial.print("ES TADO " + String(parametro.indexOf("apagar") > 0)); 
       }
-
-      String webpage = "<h1>ARDUINO</h1>";
-
       
-      Serial.print("ESTADO ES: " + String(estado));
       if (estado == 1)
       {
         webpage = "<h1><a href='./apagar'>Apagar</a></h1>";
@@ -77,14 +54,11 @@ void loop()
       }  
       if (estado == 0)
       {
-        Serial.print("ENTRO A APAGAR-!!!");
-        //webpage = "<h1>APAGAR</h1>";
         digitalWrite(13, LOW);
         webpage = "<h1><a href='./prender'>Encender</a></h1>";
       }
 
       
-
       String cipSend = "AT+CIPSEND=";
       cipSend += connectionId;
       cipSend += ",";
@@ -92,17 +66,14 @@ void loop()
       cipSend += "\r\n";
 
 
-      sendData(cipSend, 1000, DEBUG);
-      sendData(webpage, 1000, DEBUG);
-      delay(1000);
-      sendData(webpage, 1000, DEBUG);
+      sendData(cipSend, 500, DEBUG);
+      sendData(webpage, 500, DEBUG);
 
       String closeCommand = "AT+CIPCLOSE=";
       closeCommand += connectionId; // append connection id
       closeCommand += "\r\n";
 
-      sendData(closeCommand, 3000, DEBUG);
-    }
+      sendData(closeCommand, 100, DEBUG);
   }
 }
 
@@ -127,11 +98,6 @@ String sendData(String command, const int timeout, boolean debug)
     }
   }
 
-  if (debug)
-  {
-    Serial.print(response);
-  }
-
   return response;
 }
 
@@ -151,11 +117,6 @@ String readData(const int timeout, boolean debug)
       char c = esp8266.read(); // read the next character.
       response += c;
     }
-  }
-
-  if (debug)
-  {
-    Serial.print(response);
   }
 
   return response;
